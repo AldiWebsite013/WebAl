@@ -2,12 +2,100 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Persistent Timer</title>
+  <title>Timer Countdown</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding-top: 50px;
+    }
+    input {
+      width: 60px;
+      padding: 8px;
+      margin: 5px;
+      font-size: 18px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+    }
+    #timerDisplay {
+      font-size: 48px;
+      margin-top: 30px;
+    }
+  </style>
 </head>
 <body>
-  <h1 id="timer">Loading...</h1>
-  <button id="startBtn">START</button>
 
-  <script src="script.js"></script>
+  <h1>Set Timer</h1>
+
+  <div>
+    <input type="number" id="hours" placeholder="HH" min="0">
+    <input type="number" id="minutes" placeholder="MM" min="0" max="59">
+    <input type="number" id="seconds" placeholder="SS" min="0" max="59">
+  </div>
+
+  <button onclick="startTimer()">START</button>
+
+  <div id="timerDisplay">00:00:00</div>
+
+  <script>
+    let countdownInterval;
+
+    function formatTime(h, m, s) {
+      return [h, m, s].map(unit => String(unit).padStart(2, '0')).join(":");
+    }
+
+    function updateTimerDisplay(totalSeconds) {
+      const hrs = Math.floor(totalSeconds / 3600);
+      const mins = Math.floor((totalSeconds % 3600) / 60);
+      const secs = totalSeconds % 60;
+      document.getElementById("timerDisplay").textContent = formatTime(hrs, mins, secs);
+    }
+
+    function startTimer() {
+      const hrs = parseInt(document.getElementById("hours").value) || 0;
+      const mins = parseInt(document.getElementById("minutes").value) || 0;
+      const secs = parseInt(document.getElementById("seconds").value) || 0;
+
+      const totalSeconds = hrs * 3600 + mins * 60 + secs;
+      if (totalSeconds <= 0) {
+        alert("Masukkan waktu yang valid!");
+        return;
+      }
+
+      const endTime = Date.now() + totalSeconds * 1000;
+      localStorage.setItem("timer_end", endTime);
+
+      runCountdown();
+    }
+
+    function runCountdown() {
+      clearInterval(countdownInterval);
+
+      countdownInterval = setInterval(() => {
+        const endTime = parseInt(localStorage.getItem("timer_end"));
+        const remaining = Math.floor((endTime - Date.now()) / 1000);
+
+        if (remaining <= 0) {
+          clearInterval(countdownInterval);
+          localStorage.removeItem("timer_end");
+          updateTimerDisplay(0);
+          alert("⏰ Waktu Habis!");
+        } else {
+          updateTimerDisplay(remaining);
+        }
+      }, 1000);
+    }
+
+    // Cek apakah timer masih berjalan saat halaman dibuka
+    window.onload = () => {
+      const endTime = parseInt(localStorage.getItem("timer_end"));
+      if (endTime && endTime > Date.now()) {
+        runCountdown();
+      }
+    };
+  </script>
+
 </body>
 </html>
