@@ -1,6 +1,6 @@
 from telegram.ext import Updater, CommandHandler
 import requests
-import config  # import file config.py
+import configs  # import file config.py
 
 def start(update, context):
     if len(context.args) != 1:
