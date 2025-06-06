@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Countdown</title>
+    <script>
+        let seconds = {{ seconds }};
+        function countdown() {
+            if (seconds <= 0) {
+                document.getElementById("timer").innerText = "⏰ Waktu habis!";
+                return;
+            }
+            document.getElementById("timer").innerText = seconds + " detik tersisa";
+            seconds--;
+            setTimeout(countdown, 1000);
+        }
+        window.onload = countdown;
+    </script>
+</head>
+<body>
+    <h1>⏳ Countdown</h1>
+    <div id="timer">Memuat...</div>
+</body>
+</html>
