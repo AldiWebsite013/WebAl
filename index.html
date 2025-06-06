@@ -1,41 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Web Giveaway Bot</title>
+  <meta charset="UTF-8" />
+  <title>Tulis dari Bot</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 100px;
-    }
-    #result {
-      font-size: 24px;
-      margin-top: 30px;
-    }
+    body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+    #output { font-size: 24px; color: #333; }
   </style>
 </head>
 <body>
-
-  <h1>TEXT YANG DITULIS:</h1>
-  <div id="result">Memuat...</div>
+  <h2>TEXT YANG DITULIS:</h2>
+  <div id="output">Memuat...</div>
 
   <script>
-    async function ambilData() {
+    async function fetchText() {
       try {
-        const response = await fetch("http://134.209.219.210:5000/giveaway"); // Ganti dengan IP VPS kamu
-        const data = await response.json();
-        document.getElementById("result").textContent = data.text || "Belum ada teks.";
-      } catch (error) {
-        document.getElementById("result").textContent = "Gagal ambil data.";
-        console.error(error);
+        const res = await fetch("http://134.209.219.210:5000/text");
+        const data = await res.json();
+        document.getElementById("output").textContent = data.text || "Belum ada teks.";
+      } catch (err) {
+        document.getElementById("output").textContent = "Gagal ambil data.";
       }
     }
 
-    ambilData();
-    setInterval(ambilData, 3000); // auto-refresh tiap 3 detik
+    fetchText();
+    setInterval(fetchText, 5000); // update otomatis setiap 5 detik
   </script>
-
 </body>
-</html>
 </html>
