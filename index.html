@@ -1,45 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Giveaway Info</title>
+  <meta charset="UTF-8">
+  <title>Live Teks</title>
   <style>
-    body { font-family: sans-serif; text-align: center; margin-top: 50px; }
-    #countdown { font-size: 2em; margin: 20px 0; }
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 100px;
+    }
+    #output {
+      font-size: 24px;
+      color: #333;
+    }
   </style>
 </head>
 <body>
-
-  <h1 id="title">Loading...</h1>
-  <p>🎁 Hadiah: <span id="reward"></span></p>
-  <p>👥 Jumlah peserta: <span id="participants"></span></p>
-  <div id="countdown">⏳ Hitung mundur...</div>
+  <h1>TEXT YANG DITULIS:</h1>
+  <div id="output">Loading...</div>
 
   <script>
-    async function loadData() {
-      const res = await fetch("http://134.209.219.210:5000/giveaway"); // ganti dengan IP VPS kamu
-      const data = await res.json();
-
-      document.getElementById("title").textContent = data.title;
-      document.getElementById("reward").textContent = data.reward;
-      document.getElementById("participants").textContent = data.participants.length;
-
-      const endTime = new Date(data.end_time);
-      function updateCountdown() {
-        const now = new Date();
-        const diff = Math.max(0, Math.floor((endTime - now) / 1000));
-        const h = String(Math.floor(diff / 3600)).padStart(2, "0");
-        const m = String(Math.floor((diff % 3600) / 60)).padStart(2, "0");
-        const s = String(diff % 60).padStart(2, "0");
-        document.getElementById("countdown").textContent = `${h}:${m}:${s}`;
-        if (diff <= 0) clearInterval(timer);
+    async function fetchText() {
+      try {
+        const response = await fetch("https://YOUR-VPS-IP-OR-DOMAIN:5000/text");
+        const data = await response.json();
+        document.getElementById("output").textContent = data.text || "Belum ada teks.";
+      } catch (e) {
+        document.getElementById("output").textContent = "Gagal ambil data.";
       }
-      const timer = setInterval(updateCountdown, 1000);
-      updateCountdown();
     }
 
-    loadData();
+    fetchText(); // initial
+    setInterval(fetchText, 3000); // update setiap 3 detik
   </script>
-
 </body>
 </html>
