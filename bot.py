@@ -1,12 +1,16 @@
 import asyncio
 import sqlite3
 import time
+import os
 from telethon import TelegramClient, events
+from dotenv import load_dotenv
 
-API_ID = 24576633  # <- Ganti
-API_HASH = '29931cf620fad738ee7f69442c98e2ee'  # <- Ganti
-BOT_TOKEN = '7607348783:AAE8cpofF-xp05tC8tjJtMve_HRlM0cTtyM'  # <- Ganti
-YOUR_VPS_IP = "134.209.219.210"
+load_dotenv()  # Load dari .env
+
+API_ID = int(os.getenv("API_ID"))
+API_HASH = os.getenv("API_HASH")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+YOUR_VPS_IP = os.getenv("YOUR_VPS_IP")
 
 bot = TelegramClient('bot', API_ID, API_HASH).start(bot_token=BOT_TOKEN)
 
