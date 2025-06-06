@@ -2,62 +2,44 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Giveaway Countdown</title>
+  <title>Giveaway Info</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding-top: 50px; }
-    #countdown { font-size: 2em; margin-top: 20px; }
-    button { padding: 10px 20px; font-size: 18px; }
+    body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+    #countdown { font-size: 2em; margin: 20px 0; }
   </style>
 </head>
 <body>
 
-<h1 id="title">Memuat giveaway...</h1>
-<p id="reward"></p>
-<div id="countdown">00:00:00</div>
-<button onclick="join()">Ikuti Giveaway</button>
-<p id="status"></p>
+  <h1 id="title">Loading...</h1>
+  <p>🎁 Hadiah: <span id="reward"></span></p>
+  <p>👥 Jumlah peserta: <span id="participants"></span></p>
+  <div id="countdown">⏳ Hitung mundur...</div>
 
-<script>
-let endTime;
+  <script>
+    async function loadData() {
+      const res = await fetch("http://your-vps-ip:5000/giveaway"); // ganti dengan IP VPS kamu
+      const data = await res.json();
 
-async function loadGiveaway() {
-  const res = await fetch("https://your-vps-domain/giveaway");
-  const data = await res.json();
-  document.getElementById("title").textContent = data.title;
-  document.getElementById("reward").textContent = "🎁 " + data.reward;
-  endTime = new Date(data.end_time).getTime();
-  startCountdown();
-}
+      document.getElementById("title").textContent = data.title;
+      document.getElementById("reward").textContent = data.reward;
+      document.getElementById("participants").textContent = data.participants.length;
 
-function startCountdown() {
-  setInterval(() => {
-    const now = new Date().getTime();
-    const remaining = Math.floor((endTime - now) / 1000);
-    if (remaining <= 0) {
-      document.getElementById("countdown").textContent = "Selesai!";
-    } else {
-      const h = String(Math.floor(remaining / 3600)).padStart(2, '0');
-      const m = String(Math.floor((remaining % 3600) / 60)).padStart(2, '0');
-      const s = String(remaining % 60).padStart(2, '0');
-      document.getElementById("countdown").textContent = `${h}:${m}:${s}`;
+      const endTime = new Date(data.end_time);
+      function updateCountdown() {
+        const now = new Date();
+        const diff = Math.max(0, Math.floor((endTime - now) / 1000));
+        const h = String(Math.floor(diff / 3600)).padStart(2, "0");
+        const m = String(Math.floor((diff % 3600) / 60)).padStart(2, "0");
+        const s = String(diff % 60).padStart(2, "0");
+        document.getElementById("countdown").textContent = `${h}:${m}:${s}`;
+        if (diff <= 0) clearInterval(timer);
+      }
+      const timer = setInterval(updateCountdown, 1000);
+      updateCountdown();
     }
-  }, 1000);
-}
 
-async function join() {
-  const userId = prompt("Masukkan user_id Telegram kamu:");
-  if (!userId) return;
-  const res = await fetch("https://your-vps-domain/join", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user_id: userId })
-  });
-  const data = await res.json();
-  document.getElementById("status").textContent = data.message || data.error;
-}
-
-loadGiveaway();
-</script>
+    loadData();
+  </script>
 
 </body>
 </html>
