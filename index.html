@@ -17,7 +17,7 @@
 
   <script>
     async function loadData() {
-      const res = await fetch("http://your-vps-ip:5000/giveaway"); // ganti dengan IP VPS kamu
+      const res = await fetch("http://134.209.219.210:5000/giveaway"); // ganti dengan IP VPS kamu
       const data = await res.json();
 
       document.getElementById("title").textContent = data.title;
