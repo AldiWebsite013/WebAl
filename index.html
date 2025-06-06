@@ -1,114 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Timer Countdown</title>
+  <meta charset="UTF-8" />
+  <title>Giveaway Countdown</title>
   <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding-top: 50px;
-    }
-    input {
-      width: 60px;
-      padding: 8px;
-      margin: 5px;
-      font-size: 18px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 18px;
-    }
-    #timerDisplay {
-      font-size: 48px;
-      margin-top: 30px;
-    }
+    body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+    #countdown { font-size: 2em; margin-top: 20px; }
+    button { padding: 10px 20px; font-size: 18px; }
   </style>
 </head>
 <body>
 
-  <h1>Set Timer</h1>
+<h1 id="title">Memuat giveaway...</h1>
+<p id="reward"></p>
+<div id="countdown">00:00:00</div>
+<button onclick="join()">Ikuti Giveaway</button>
+<p id="status"></p>
 
-  <div>
-    <input type="number" id="hours" placeholder="HH" min="0">
-    <input type="number" id="minutes" placeholder="MM" min="0" max="59">
-    <input type="number" id="seconds" placeholder="SS" min="0" max="59">
-  </div>
+<script>
+let endTime;
 
-  <button onclick="startTimer()">START</button>
+async function loadGiveaway() {
+  const res = await fetch("https://your-vps-domain/giveaway");
+  const data = await res.json();
+  document.getElementById("title").textContent = data.title;
+  document.getElementById("reward").textContent = "🎁 " + data.reward;
+  endTime = new Date(data.end_time).getTime();
+  startCountdown();
+}
 
-  <div id="timerDisplay">00:00:00</div>
-  <p id="backendStatus"></p>
-
-  <script>
-    let countdownInterval;
-
-    function formatTime(h, m, s) {
-      return [h, m, s].map(unit => String(unit).padStart(2, '0')).join(":");
+function startCountdown() {
+  setInterval(() => {
+    const now = new Date().getTime();
+    const remaining = Math.floor((endTime - now) / 1000);
+    if (remaining <= 0) {
+      document.getElementById("countdown").textContent = "Selesai!";
+    } else {
+      const h = String(Math.floor(remaining / 3600)).padStart(2, '0');
+      const m = String(Math.floor((remaining % 3600) / 60)).padStart(2, '0');
+      const s = String(remaining % 60).padStart(2, '0');
+      document.getElementById("countdown").textContent = `${h}:${m}:${s}`;
     }
+  }, 1000);
+}
 
-    function updateTimerDisplay(totalSeconds) {
-      const hrs = Math.floor(totalSeconds / 3600);
-      const mins = Math.floor((totalSeconds % 3600) / 60);
-      const secs = totalSeconds % 60;
-      document.getElementById("timerDisplay").textContent = formatTime(hrs, mins, secs);
-    }
+async function join() {
+  const userId = prompt("Masukkan user_id Telegram kamu:");
+  if (!userId) return;
+  const res = await fetch("https://your-vps-domain/join", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: userId })
+  });
+  const data = await res.json();
+  document.getElementById("status").textContent = data.message || data.error;
+}
 
-    async function startTimer() {
-      const hrs = parseInt(document.getElementById("hours").value) || 0;
-      const mins = parseInt(document.getElementById("minutes").value) || 0;
-      const secs = parseInt(document.getElementById("seconds").value) || 0;
-
-      const totalSeconds = hrs * 3600 + mins * 60 + secs;
-      if (totalSeconds <= 0) {
-        alert("Masukkan waktu yang valid!");
-        return;
-      }
-
-      const timeStr = formatTime(hrs, mins, secs);
-      const backendUrl = "http://YOUR-VPS-IP:5000/set_timer"; // Ganti dengan IP VPS kamu
-
-      try {
-        const response = await fetch(`${backendUrl}?time=${timeStr}`, { method: "POST" });
-        const data = await response.json();
-        if (response.ok) {
-          document.getElementById("backendStatus").textContent = data.message || "Berhasil!";
-        } else {
-          document.getElementById("backendStatus").textContent = data.error || "Gagal mengirim ke backend.";
-        }
-      } catch (e) {
-        document.getElementById("backendStatus").textContent = "❌ Gagal koneksi ke backend.";
-      }
-
-      const endTime = Date.now() + totalSeconds * 1000;
-      localStorage.setItem("timer_end", endTime);
-      runCountdown();
-    }
-
-    function runCountdown() {
-      clearInterval(countdownInterval);
-      countdownInterval = setInterval(() => {
-        const endTime = parseInt(localStorage.getItem("timer_end"));
-        const remaining = Math.floor((endTime - Date.now()) / 1000);
-        if (remaining <= 0) {
-          clearInterval(countdownInterval);
-          localStorage.removeItem("timer_end");
-          updateTimerDisplay(0);
-          alert("⏰ Waktu Habis!");
-        } else {
-          updateTimerDisplay(remaining);
-        }
-      }, 1000);
-    }
-
-    window.onload = () => {
-      const endTime = parseInt(localStorage.getItem("timer_end"));
-      if (endTime && endTime > Date.now()) {
-        runCountdown();
-      }
-    };
-  </script>
+loadGiveaway();
+</script>
 
 </body>
-</html>
 </html>
